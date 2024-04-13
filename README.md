@@ -6,9 +6,6 @@
 
 ##### [Tableau Dashboard](https://public.tableau.com/app/profile/ben.robinson7893/viz/BellaBeatAnalysisDashboard/BellaBeatAnalysisDashboard_1)
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 
 ## **Scenario**
 
