@@ -1,0 +1,396 @@
+---
+title: "BellaBeat Case Study"
+author: Ben Robinson
+output: html_document
+date: "2024-04-07"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### **Scenario**
+
+BellaBeat is a tech driven fitness company focused on women's health. 
+Since they launched in 2013 they are trying to gather data and insights into their customers so the company can continue to grow globally.
+
+### **Ask**
+**Business Task:** Analyze fitness data from users to gain insights into how it is being used to guide the marketing analytics team for continued global growth of BellaBeat.
+
+ **Primary Stakeholders:** Urška Sršen and Sando Mur, executive team members.
+ 
+ **Secondary Stakeholders:** Marketing analytics team
+
+### **Prepare**
+The data came from the following open source material: https://www.kaggle.com/datasets/arashnic/fitbit
+
+There are a total of 29 csv files that spans two months. It starts in March and ends in April. 
+- The data is from more than 30 fitbit users that consented to their data being used.
+
+- The data tracked was their steps, sleep, activity minutes, weight, calories.
+
+- The sample is small as only having around 30 users. This might not be considered the best representation of their user population and only spans two months.
+
+- After some data manipulation done later using ```n_distinct()``` that there were a total of 35 users however not all collected data of the full two months  
+
+- The data is slightly outdated as it is from 2016. This could lead to some misleading results about thier users today. 
+
+- Upon investigation only 24 users tracked daily sleep and only for the month of April to May.
+
+Here are the packages used for analysis
+```
+install.packages("tidyverse")
+library(tidyverse)
+install.packages("here")
+library(here)
+install.packages("janitor")
+library(janitor)
+install.packages("read.csv")
+library(read.csv)
+install.packages("skimr")
+library(skimr)
+```
+
+### **Process**
+After uploading the different csv files that will be used. I checked for any duplicates and drop any N/A values from the data.
+The data was uploaded to correspond to the two different months of data in the original files.
+
+**_daily_activity_1 represents the first month_**
+
+**_daily_activity_2 represents the second month_**
+
+This process continued through the rest of the different sets of data used.
+
+##### **Determining Duplicates**
+```
+sum(duplicated(daily_activity_1))
+sum(duplicated(daily_activity_2))
+sum(duplicated(daily_sleep_2))
+sum(duplicated(daily_steps_2))
+sum(duplicated(hourly_calories_1))
+sum(duplicated(hourly_calories_2))
+sum(duplicated(hourly_intensities_1))
+sum(duplicated(hourly_intensities_2))
+sum(duplicated(hourly_steps_1))
+sum(duplicated(hourly_steps_2))
+sum(duplicated(weight_log_1))
+sum(duplicated(weight_log_2))
+```
+Only one instance of duplicates were found in the daily_sleep_2 data.
+
+#### **Droping duplicates and N/A values from the data**
+
+```
+daily_activity_1 <- daily_activity_1 %>% 
+  distinct() %>% 
+  drop_na()
+daily_activity_2 <- daily_activity_2 %>%
+  distinct() %>% 
+  drop_na()
+daily_steps_2 <- daily_steps_2 %>%
+  distinct() %>%
+  drop_na()
+daily_sleep_2 <- daily_sleep_2 %>%
+  distinct() %>%
+  drop_na()
+hourly_calories_1 <- hourly_calories_1 %>%
+  distinct() %>%
+  drop_na()
+hourly_calories_2 <- hourly_calories_2 %>%
+  distinct() %>%
+  drop_na()
+hourly_intensities_1 <- hourly_intensities_1 %>%
+  distinct() %>%
+  drop_na()
+hourly_intensities_2 <- hourly_intensities_2 %>%
+  distinct() %>%
+  drop_na()
+hourly_steps_1 <- hourly_steps_1 %>%
+  distinct() %>%
+  drop_na()
+hourly_steps_2 <- hourly_steps_2 %>%
+  distinct() %>%
+  drop_na()
+  ```
+  
+After looking further using again ```sum(duplicated(daily_sleep_2))``` There were no more duplicates in that data. 
+
+#### **Changing column title formats**
+```
+clean_names(daily_activity_1)
+daily_activity_1 <- rename_with(daily_activity_1, tolower)
+clean_names(daily_activity_2)
+daily_activity_2 <- rename_with(daily_activity_2, tolower)
+clean_names(daily_steps_2)
+daily_steps_2 <- rename_with(daily_steps_2, tolower)
+clean_names(daily_sleep_2)
+daily_sleep_2 <- rename_with(daily_sleep_2, tolower)
+clean_names(hourly_calories_1)
+hourly_calories_1 <- rename_with(hourly_calories_1, tolower)
+clean_names(hourly_calories_2)
+hourly_calories_2 <- rename_with(hourly_calories_2, tolower)
+clean_names(hourly_intensities_1)
+hourly_intensities_1 <- rename_with(hourly_intensities_1, tolower)
+clean_names(hourly_intensities_2)
+hourly_intensities_2 <- rename_with(hourly_intensities_2, tolower)
+clean_names(hourly_steps_1)
+hourly_steps_1 <- rename_with(hourly_steps_1, tolower)
+clean_names(hourly_steps_2)
+hourly_steps_2 <- rename_with(hourly_steps_2, tolower)
+clean_names(weight_log_1)
+weight_log_1 <- rename_with(weight_log_1, tolower)
+clean_names(weight_log_2)
+weight_log_2 <- rename_with(weight_log_2, tolower)
+```
+
+#### **Changing date format**
+
+```
+daily_activity_1 <- daily_activity_1 %>%
+  rename(date = activitydate) %>%
+  mutate(date = as.Date(date, format("%m/%d/%Y")))
+daily_activity_2 <- daily_activity_2 %>%
+  rename(date = activitydate) %>%
+  mutate(date = as.Date(date, format("%m/%d/%Y")))
+daily_sleep_2 <- daily_sleep_2 %>%
+  rename(date = sleepday) %>%
+  mutate(date = as.Date(date, format("%m/%d/%Y")))
+```
+
+#### **Merging and combining the two months of data for further analysis**
+
+```
+daily_activity_sleep <- merge(daily_activity_2, daily_sleep_2, by = c("id","date"))
+
+total_daily_activity <- rbind(daily_activity_1,daily_activity_2)
+
+total_hours_intensities <- rbind(hourly_intensities_1,hourly_intensities_2)
+total_hours_calories <- rbind(hourly_calories_1,hourly_calories_2)
+total_hours_steps <- rbind(hourly_steps_1,hourly_steps_2)
+total_weight_log <- rbind(weight_log_1, weight_log_2)
+```
+
+There was a set of duplicates found in the total_weight_log
+```
+total_weight_log <- total_weight_log %>%
+  distinct()
+sum(duplicated(total_weight_log))
+```
+This removed and double checked that there are no duplicates.
+
+The data has been checked for duplicates and N/A values. The column titles and dates have been formatted. The data has been merged/combined to allow analysis of the fitness tracker for two months. The only instance where the data is kept to one month is for daily_activity_sleep. This is due to the sleep tracker only have daily sleep for the one month so those were merged.
+
+### **Analyze**
+
+First looked into the summary statistics of the daily activity for the two months
+
+##### **Summary statistics**
+```
+total_daily_activity %>%
+  select(totalsteps, totaldistance,veryactiveminutes,fairlyactiveminutes,sedentaryminutes,calories) %>%
+  summary()
+```
+```{r summary, echo=FALSE}
+knitr::include_graphics("summary_total_activity.png")
+```
+
+Looking at the data there were several instances where the daily steps were not tracked at all and no other values were inserted. This could be due to the user charging their device or other factors that didn't read any input for the day. I wanted to see how the data changes when those days were taken out which led me to a new data frame. **no_zero_activity** 
+
+First I wanted to figure out how many times zero step activity was registered.
+```
+nrow(total_daily_activity[total_daily_activity$totalsteps == '0', ])
+```
+
+This leads to 138 rows that had no input data. So those were filterd out using the following code:
+```
+no_zero_activity <- filter(total_daily_activity, totalsteps != '0')
+```
+
+Now to look at the summary of this data.
+```
+no_zero_activity %>%
+  select(totalsteps, totaldistance,veryactiveminutes,fairlyactiveminutes,sedentaryminutes,calories) %>%
+  summary()
+  ```
+  ```{r no zero summary, echo=FALSE}
+  knitr::include_graphics("no_zero_summary.png")
+  ```
+  
+  Interesting to see that without those days of no input the average number of steps goes up. This data will be used when analyzing going forward. It will be important to see the steps when they users are tracking their steps through the device.
+ 
+##### **Weekly Steps**
+
+Looking at the average steps per day over the course of the week. This will also include a target range of steps of 7500 to 10000.
+
+```
+weekday_avgsteps <- no_zero_activity %>%
+  mutate(weekday = weekdays(date))
+weekday_avgsteps$weekday <- ordered(weekday_avgsteps$weekday, levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"))
+
+weekday_avgsteps <- weekday_avgsteps %>%
+  group_by(weekday) %>%
+  summarize(daily_avgsteps = mean(totalsteps))
+  
+ggplot(data = weekday_avgsteps, aes(x = weekday,y = daily_avgsteps)) + geom_col(fill = "#336699") + 
+   geom_hline(yintercept =  7500) + geom_hline(yintercept = 10000) + 
+   annotate("rect", xmin = .5, xmax = 7.5, ymin = 7500, ymax= 10000, alpha = 0.5, fill = "#669900") + 
+   annotate("text",x = 3, y = 9000, label = "target number of steps") +
+   labs(title = "Averge steps per day", x = "", y = "average daily steps")
+  ```
+
+```{r weekday steps, echo=FALSE}
+knitr::include_graphics("Average Steps Per Day with Target.png")
+```
+
+We can see that without the days of the user not tracking steps that they meet the goal for steps per day everyday except on Sundays.
+
+##### **Weekly Sleep**
+
+It is recommended to get about 7 hours of sleep each night for an adult, which comes to 420 minutes.
+
+```
+weekday_avgsleep <- daily_activity_sleep %>%
+  mutate(weekday = weekdays(date))
+weekday_avgsleep$weekday <- ordered(weekday_avgsleep$weekday, levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"))
+
+weekday_avgsleep <- weekday_avgsleep %>%
+  group_by(weekday) %>%
+  summarize(daily_avgsleep = mean(totalminutesasleep))
+
+ggplot(data = weekday_avgsleep, aes(x = weekday, y = daily_avgsleep)) +geom_col(fill = "#9966CC") +
+  geom_hline(yintercept = 420) + annotate("text", x = 3, y = 475, label = "target amount of sleep") +
+  labs(title = "Average Daily Minutes of Sleep", x = "", y = "minutes of sleep")
+```
+```{r weekly sleep, echo=FALSE}
+knitr::include_graphics("Average Daily Minutes of Sleep.png")
+```
+  
+Through this we can see three days of the week where the user on average does not get the recommended amount of sleep.
+
+##### **Hourly data**
+
+This is to gain insights into what hours of the day the users are most active. This can help develop and track habits of the individuals.
+
+The code was used to format and plot the hourly **intensities**, **steps**, and **calories** of the users. 
+
+```
+total_hours_intensities <- total_hours_intensities %>%
+  rename(date_time = activityhour) %>%
+  mutate(date_time = as.POSIXct(date_time, format = "%m/%d/%Y %I:%M:%S %p"), tz = Sys.timezone())
+
+hours_avgintensities <- total_hours_intensities %>%
+  separate(date_time, into = c("date", "time"), sep = " ")
+ 
+hours_avgintensities <- hours_avgintensities %>%
+  group_by(time) %>%
+  drop_na() %>%
+  summarize(avg_intensities = mean(totalintensity))
+
+ggplot(data = hours_avgintensities, aes(x = time, y = avg_intensities)) +
+  geom_col(fill = "#0066CC") + labs(title = "Average Hourly Intensities Per Day",
+                                    x = "time", y= "Average Minutes" ) +
+  theme(axis.text.x = element_text(angle = 90))
+
+total_hours_steps <- total_hours_steps %>%
+  rename(date_time = activityhour) %>%
+  mutate(date_time = as.POSIXct(date_time, format = "%m/%d/%Y %I:%M:%S %p"),
+         tz = Sys.timezone())
+
+hours_avgsteps <- total_hours_steps %>%
+  separate(date_time, into = c("date", "time"), sep = " ")
+
+hours_avgsteps <- hours_avgsteps %>%
+  group_by(time) %>%
+  drop_na() %>%
+  summarize(hourly_avg = mean(steptotal))
+
+ggplot(data = hours_avgsteps, aes(x = time, y = hourly_avg)) +
+  geom_col(fill = "#CC9933") + labs(title = "Hourly Average Step Count",
+                                    y = "hourly average") +
+  theme(axis.text.x = element_text(angle = 90))
+  
+total_hours_calories <- total_hours_calories %>%
+  rename(date_time = activityhour) %>%
+  mutate(date_time = as.POSIXct(date_time, format = "%m/%d/%Y %I:%M:%S %p"),
+         tz = Sys.timezone())
+
+hours_avgcalories <- total_hours_calories %>%
+  separate(date_time, into = c("date", "time"), sep = " ")
+
+hours_avgcalories <- hours_avgcalories %>%
+  group_by(time) %>%
+  drop_na() %>%
+  summarize(hourly_avg = mean(calories))
+
+ggplot(data = hours_avgcalories, aes(x = time, y = hourly_avg)) +
+  geom_col(fill = "#990066") + labs(title = "Hourly Average Calories Burned",
+                                y = "hourly average") +
+  theme(axis.text.x = element_text(angle = 90))
+```
+```{r hourly, echo=FALSE}
+knitr::include_graphics("Hourly Average Intensities Per Day.png")
+knitr::include_graphics("Hourly Average Step Count.png")
+knitr::include_graphics("Hourly Average Calories Burned.png")
+```
+
+You can see a relationship between the three sets of hourly data where there is a common dip in intensities, steps, and to a lesser extent calories from about 1 PM to 4PM.
+
+##### **Relationship with total steps taken and calories burned**
+
+We typically associate more steps with burning more calories burned, but looking at a plot with a focus on sedentary minutes it looks like it isn't as significant.
+
+```
+ggplot(data = no_zero_activity, aes(x =  totalsteps, y = calories, col = sedentaryminutes)) + 
+  geom_point() + geom_smooth(method = "lm", color = "red") +
+  labs(title = "Total Steps VS Calories Burned", x = " Total Steps", y = " Calories Burned")
+```
+```{r plot, echo=FALSE}
+knitr::include_graphics("Total Steps VS Calories Burned.png")
+```
+
+##### **Looking at the method of entering weights**
+
+A feature of the app is to track the users weight. They have an option of either manually entering this data or tracking it through other tech devices. 
+
+How many users tracked their weight through the app over the period of two months?
+```
+n_distinct(total_weight_log$id)
+```
+
+This shows that 13 unique users tracked their weight. This is not a large sample to gain a lot of insights from. 
+
+Breaking down the use between manually entered or device entered data.
+
+```
+input_count <- factor(c(rep("True",63),rep("False",35)))
+input_count <- table(input_count)
+pie(input_count)
+count <- c(63,35)
+sum(count)
+pie(count, labels = paste0(count, "%"))
+legend("bottomleft", legend = c("Manual Report", "Device Reported"), fill = c("white","lightblue"))
+```
+```{r weight, echo=FALSE}
+knitr::include_graphics("percentage of manual entered weights.png")
+```
+
+Shows that for those that did track their weight through the app the majority did it manually.  
+
+### **Share**
+
+#### [**BellaBeat Analysis Dashboard**](https://public.tableau.com/app/profile/ben.robinson7893/viz/BellaBeatAnalysisDashboard/BellaBeatAnalysisDashboard_1)
+
+
+### **Act**
+
+#### **Recommendations for the marketing analytics team:**
+
+1) **Daily notification to remind users to stay active:** 
+There are a high level of sedentary minutes among users that could be cut down and increase steps.
+
+2) **Establish a sleep schedule:**
+On average the users showed to get under the recommended 7 hours of sleep per night. Allowing them to establish a sleep schedule with notifications for reminders. 
+
+3) **Point/Reward system:**
+Allows the users to set goals and earn rewards to different related BellaBeat fitness tech to potentially expand brand item usage and ensure healthy habits.
+Could incentivize tracking their weight through a BellaBeat affiliated device. 
