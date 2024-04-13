@@ -9,18 +9,6 @@ date: "2024-04-07"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-### **Scenario**
-
-BellaBeat is a tech driven fitness company focused on women's health. 
-Since they launched in 2013 they are trying to gather data and insights into their customers so the company can continue to grow globally.
-
-### **Ask**
-**Business Task:** Analyze fitness data from users to gain insights into how it is being used to guide the marketing analytics team for continued global growth of BellaBeat.
-
- **Primary Stakeholders:** Urška Sršen and Sando Mur, executive team members.
- 
- **Secondary Stakeholders:** Marketing analytics team
-
 ### **Prepare**
 The data came from the following open source material: https://www.kaggle.com/datasets/arashnic/fitbit
 
@@ -376,21 +364,3 @@ knitr::include_graphics("percentage of manual entered weights.png")
 
 Shows that for those that did track their weight through the app the majority did it manually.  
 
-### **Share**
-
-#### [**BellaBeat Analysis Dashboard**](https://public.tableau.com/app/profile/ben.robinson7893/viz/BellaBeatAnalysisDashboard/BellaBeatAnalysisDashboard_1)
-
-
-### **Act**
-
-#### **Recommendations for the marketing analytics team:**
-
-1) **Daily notification to remind users to stay active:** 
-There are a high level of sedentary minutes among users that could be cut down and increase steps.
-
-2) **Establish a sleep schedule:**
-On average the users showed to get under the recommended 7 hours of sleep per night. Allowing them to establish a sleep schedule with notifications for reminders. 
-
-3) **Point/Reward system:**
-Allows the users to set goals and earn rewards to different related BellaBeat fitness tech to potentially expand brand item usage and ensure healthy habits.
-Could incentivize tracking their weight through a BellaBeat affiliated device. 
